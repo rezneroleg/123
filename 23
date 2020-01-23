@@ -1,6 +1,5 @@
 
 
-
 var oOutput = Context.createOutputObject();
 var xlTableActive=false;
 oOutput.DefineF(getString("ID_STYLE_RD_HEADER_FOOTER"), "Times New Roman", 10, Constants.C_TRANSPARENT,  Constants.FMT_LEFT| Constants.FMT_VTOP, 0, 0, 0, 0, 0,0, 1);
@@ -135,7 +134,7 @@ function main() {
             if (osinglemodel.Type()== txtTypeDiagram) {
             
             var aSelModels  = ArisData.getSelectedModels( Context.getDefinedItemTypes(Constants.CID_MODEL) );
-            createSection1(oOutput, ArisData.getSelectedDatabases());
+              createSection1(oOutput, ArisData.getSelectedDatabases());
           //  outputDataPerModel1( aSelModels, hld_oOutputFile, hld_nOutGraphic.value, hld_nAssgnLevel.value, 0 );
          //   outputDataPerModel2( aSelModels, hld_oOutputFile, hld_nOutGraphic.value, hld_nAssgnLevel.value, 0 );
         //    outputDataPerModel3( aSelModels, hld_oOutputFile, hld_nOutGraphic.value, hld_nAssgnLevel.value, 0 );
@@ -735,7 +734,7 @@ function createSection1(p_output, p_aDatabase)
 		p_output.BeginTable(100, Constants.C_BLACK, Constants.C_TRANSPARENT,  Constants.FMT_LEFT | Constants.FMT_REPEAT_HEADER, 0);
 		xlTableActive=true;
 	}
-	if(Context.getSelectedFormat()!=Constants.OUTEXCEL)
+	if(Context.getSelectedFormat()!=Constants.OUTEXCEL){
 		p_output.BeginTable(65, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0);
 		p_output.TableRow();
 			p_output.ResetFrameStyle();
@@ -759,6 +758,7 @@ function createSection1(p_output, p_aDatabase)
 		p_output.BeginParagraph( Constants.FMT_LEFT, 0.35, 0.71, 0, 0, 0);
 		p_output.OutputLn(getString("ID_REPORTDEF_6"), getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35);
 		p_output.EndParagraph();
+    }
 	if(Context.getSelectedFormat()!=Constants.OUTEXCEL){
 		p_output.EndTable("", 100, getString("ID_DEFAULT_FONT"), 10, Constants.C_BLACK, Constants.C_TRANSPARENT, 0, Constants.FMT_LEFT, 0);
 	} else {
@@ -767,6 +767,7 @@ function createSection1(p_output, p_aDatabase)
 	for(var i=0; i<p_aDatabase.length; i++) {
 		iteration_group(p_output, ArisData.sort(p_aDatabase[i].Find(Constants.SEARCH_MODEL,[Constants.MT_VAL_ADD_CHN_DGM], Constants.AT_NAME, nLocale, "*_Окружение БП*", Constants.SEARCH_CMP_WILDCARDS),Constants.AT_NAME, nLocale));
 	}
+}
 
 	// createSection1 local functions:
 		/**
@@ -809,7 +810,7 @@ function createSection1(p_output, p_aDatabase)
 						{
 							// do not create new table if all data is empty
 							if(p_aAttr.length==0)
-								return
+								return;
 						
 							if(Context.getSelectedFormat()!=Constants.OUTEXCEL)
 								p_output.BeginTable(65, RGB(0,0,0), RGB(255,255,255),  Constants.FMT_LEFT, 0);
@@ -820,52 +821,52 @@ function createSection1(p_output, p_aDatabase)
 									p_output.TableCell("", 8.10, getString("ID_DEFAULT_FONT"), 10, Constants.C_BLACK, RGB(255,255,255), 0,  Constants.FMT_VTOP |  Constants.FMT_LEFT, 0);
 								p_output.BeginParagraph( Constants.FMT_LEFT, 0.71, 0.71, 0, 0, 0);
 							for(var iter=0; iter<p_aObjDef.length; iter++) {
-								writeData(p_output, p_aObjDef[iter].Name(nLocale))
+								writeData(p_output, p_aObjDef[iter].Name(nLocale));
 							}
-								p_output.Output(getString("ID_REPORTDEF_7"), getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71)
+								p_output.Output(getString("ID_REPORTDEF_7"), getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
 							for(var iter=0; iter<p_aObjDef.length; iter++) {
-								writeData1(p_output, p_aObjDef[iter].Attribute(Constants.AT_DESC, nLocale).GetValue(false))
+								writeData1(p_output, p_aObjDef[iter].Attribute(Constants.AT_DESC, nLocale).GetValue(false));
+							}
+								p_output.EndParagraph();
+									p_output.TableCell("", 7.25, getString("ID_DEFAULT_FONT"), 10, Constants.C_BLACK, RGB(255,255,255), 0,  Constants.FMT_VTOP |  Constants.FMT_LEFT, 0);
+								p_output.BeginParagraph( Constants.FMT_LEFT, 0.35, 0.71, 0, 0, 0);
+							for(var iter=0; iter<p_aObjDef1.length; iter++) {
+								writeData2(p_output, p_aObjDef1[iter].Name(nLocale));
+							}
+								p_output.Output(getString("ID_REPORTDEF_7"), getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35);
+							for(var iter=0; iter<p_aObjDef1.length; iter++) {
+								writeData3(p_output, p_aObjDef1[iter].Attribute(Constants.AT_DESC, nLocale).GetValue(false));
 							}
 								p_output.EndParagraph()
-									p_output.TableCell("", 7.25, getString("ID_DEFAULT_FONT"), 10, Constants.C_BLACK, RGB(255,255,255), 0,  Constants.FMT_VTOP |  Constants.FMT_LEFT, 0)
-								p_output.BeginParagraph( Constants.FMT_LEFT, 0.35, 0.71, 0, 0, 0)
-							for(var iter=0; iter<p_aObjDef1.length; iter++) {
-								writeData2(p_output, p_aObjDef1[iter].Name(nLocale))
-							}
-								p_output.Output(getString("ID_REPORTDEF_7"), getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35)
-							for(var iter=0; iter<p_aObjDef1.length; iter++) {
-								writeData3(p_output, p_aObjDef1[iter].Attribute(Constants.AT_DESC, nLocale).GetValue(false))
-							}
-								p_output.EndParagraph()
-									p_output.TableCell("", 7.68, getString("ID_DEFAULT_FONT"), 10, Constants.C_BLACK, RGB(255,255,255), 0,  Constants.FMT_VTOP |  Constants.FMT_LEFT, 0)
-								p_output.BeginParagraph( Constants.FMT_LEFT, 0.71, 0.71, 0, 0, 0)
+									p_output.TableCell("", 7.68, getString("ID_DEFAULT_FONT"), 10, Constants.C_BLACK, RGB(255,255,255), 0,  Constants.FMT_VTOP |  Constants.FMT_LEFT, 0);
+								p_output.BeginParagraph( Constants.FMT_LEFT, 0.71, 0.71, 0, 0, 0);
 							for(var iter=0; iter<p_aObjDef2.length; iter++) {
-								writeData4(p_output, p_aObjDef2[iter].Name(nLocale))
+								writeData4(p_output, p_aObjDef2[iter].Name(nLocale));
 							}
-								p_output.EndParagraph()
-									p_output.TableCell("", 41.15, getString("ID_DEFAULT_FONT"), 10, Constants.C_BLACK, RGB(255,255,255), 0,  Constants.FMT_VTOP |  Constants.FMT_LEFT, 0)
-								p_output.BeginParagraph( Constants.FMT_LEFT, 0.71, 0.71, 0, 0, 0)
+								p_output.EndParagraph();
+									p_output.TableCell("", 41.15, getString("ID_DEFAULT_FONT"), 10, Constants.C_BLACK, RGB(255,255,255), 0,  Constants.FMT_VTOP |  Constants.FMT_LEFT, 0);
+								p_output.BeginParagraph( Constants.FMT_LEFT, 0.71, 0.71, 0, 0, 0);
 							for(var iter=0; iter<p_aObjDef4.length; iter++) {
-								writeData5(p_output, p_aObjDef4[iter].Name(nLocale))
+								writeData5(p_output, p_aObjDef4[iter].Name(nLocale));
 							}
-								p_output.Output(getString("ID_REPORTDEF_7"), getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71)
+								p_output.Output(getString("ID_REPORTDEF_7"), getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
 							for(var iter=0; iter<p_aObjDef4.length; iter++) {
-								writeData6(p_output, p_aObjDef4[iter].Attribute(Constants.AT_DESC, nLocale).GetValue(false))
+								writeData6(p_output, p_aObjDef4[iter].Attribute(Constants.AT_DESC, nLocale).GetValue(false));
 							}
-								p_output.EndParagraph()
-									p_output.TableCell("", 35.82, getString("ID_DEFAULT_FONT"), 10, Constants.C_BLACK, RGB(255,255,255), 0,  Constants.FMT_VTOP |  Constants.FMT_LEFT, 0)
-								p_output.BeginParagraph( Constants.FMT_LEFT, 0.35, 0.71, 0, 0, 0)
+								p_output.EndParagraph();
+									p_output.TableCell("", 35.82, getString("ID_DEFAULT_FONT"), 10, Constants.C_BLACK, RGB(255,255,255), 0,  Constants.FMT_VTOP |  Constants.FMT_LEFT, 0);
+								p_output.BeginParagraph( Constants.FMT_LEFT, 0.35, 0.71, 0, 0, 0);
 							for(var iter=0; iter<p_aObjDef5.length; iter++) {
-								writeData7(p_output, p_aObjDef5[iter].Name(nLocale))
+								writeData7(p_output, p_aObjDef5[iter].Name(nLocale));
 							}
-								p_output.OutputLn(getString("ID_REPORTDEF_7"), getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35)
-								p_output.EndParagraph()
+								p_output.OutputLn(getString("ID_REPORTDEF_7"), getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35);
+								p_output.EndParagraph();
 							}
 
-							if(Context.getSelectedFormat()!=Constants.OUTEXCEL)
-								p_output.EndTable("", 100, getString("ID_DEFAULT_FONT"), 10, Constants.C_BLACK, Constants.C_TRANSPARENT, 0, Constants.FMT_LEFT, 0)
-							else
-								p_output.TableRow()
+							if(Context.getSelectedFormat()!=Constants.OUTEXCEL){
+								p_output.EndTable("", 100, getString("ID_DEFAULT_FONT"), 10, Constants.C_BLACK, Constants.C_TRANSPARENT, 0, Constants.FMT_LEFT, 0);
+							}else{
+								p_output.TableRow();
 
 							// dtable local functions:
 							/**
@@ -873,119 +874,119 @@ function createSection1(p_output, p_aDatabase)
 							 * @param {String } p_String
 							*/
 							function writeData(p_output, p_String) {
-								p_output.Output(p_String, getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71)
+								p_output.Output(p_String, getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
 							}
 							/**
 							 * @param {Output} p_output The output object
 							 * @param {Object } p_Object
 							*/
 							function writeData1(p_output, p_Object) {
-								p_output.OutputLn(p_Object, getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71)
+								p_output.OutputLn(p_Object, getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
 							}
 							/**
 							 * @param {Output} p_output The output object
 							 * @param {String } p_String
 							*/
 							function writeData2(p_output, p_String) {
-								p_output.Output(p_String, getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35)
+								p_output.Output(p_String, getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35);
 							}
 							/**
 							 * @param {Output} p_output The output object
 							 * @param {Object } p_Object
 							*/
 							function writeData3(p_output, p_Object) {
-								p_output.OutputLn(p_Object, getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35)
+								p_output.OutputLn(p_Object, getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35);
 							}
 							/**
 							 * @param {Output} p_output The output object
 							 * @param {String } p_String
 							*/
 							function writeData4(p_output, p_String) {
-								p_output.OutputLn(p_String, getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71)
+								p_output.OutputLn(p_String, getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
 							}
 							/**
 							 * @param {Output} p_output The output object
 							 * @param {String } p_String
 							*/
 							function writeData5(p_output, p_String) {
-								p_output.Output(p_String, getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71)
+								p_output.Output(p_String, getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
 							}
 							/**
 							 * @param {Output} p_output The output object
 							 * @param {Object } p_Object
 							*/
 							function writeData6(p_output, p_Object) {
-								p_output.OutputLn(p_Object, getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71)
+								p_output.OutputLn(p_Object, getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
 							}
 							/**
 							 * @param {Output} p_output The output object
 							 * @param {String } p_String
 							*/
 							function writeData7(p_output, p_String) {
-								p_output.Output(p_String, getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35)
+								p_output.Output(p_String, getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35);
 							}
 						}
 						
 						function collect5(p_array){
 							var result = new Array();
 							for(var i=0; i<p_array.length; i++){
-								result.push(p_array[i].Attribute(Constants.AT_HIER_NUM, nLocale))
+								result.push(p_array[i].Attribute(Constants.AT_HIER_NUM, nLocale));
 							}
-							return ArisData.Unique(result)
+							return ArisData.Unique(result);
 						}
 					}
 					
 					function collect4(p_array){
 						var result = new Array();
 						for(var i=0; i<p_array.length; i++){
-							result = result.concat(p_array[i].getConnectedObjs([Constants.OT_PACK], Constants.EDGES_OUT, [Constants.CT_HAS_OUT]))
+							result = result.concat(p_array[i].getConnectedObjs([Constants.OT_PACK], Constants.EDGES_OUT, [Constants.CT_HAS_OUT]));
 						}
-						return ArisData.Unique(result)
+						return ArisData.Unique(result);
 					}
 					function collect2(p_array){
 						var result = new Array();
 						for(var i=0; i<p_array.length; i++){
-							result = result.concat(p_array[i].getConnectedObjs(new Array(Constants.OT_ORG_UNIT,Constants.OT_ORG_UNIT_TYPE), Constants.EDGES_TYP, [Constants.CT_HAS_CONSLT_ROLE_IN_1]))
+							result = result.concat(p_array[i].getConnectedObjs(new Array(Constants.OT_ORG_UNIT,Constants.OT_ORG_UNIT_TYPE), Constants.EDGES_TYP, [Constants.CT_HAS_CONSLT_ROLE_IN_1]));
 						}
-						return ArisData.Unique(result)
+						return ArisData.Unique(result);
 					}
 					function collect3(p_array){
 						var result = new Array();
 						for(var i=0; i<p_array.length; i++){
-							result = result.concat(p_array[i].getConnectedObjs([Constants.OT_PACK], Constants.EDGES_IN, [Constants.CT_IS_INP_FOR]))
+							result = result.concat(p_array[i].getConnectedObjs([Constants.OT_PACK], Constants.EDGES_IN, [Constants.CT_IS_INP_FOR]));
 						}
-						return ArisData.Unique(result)
+						return ArisData.Unique(result);
 					}
 					function collect1(p_array){
 						var result = new Array();
 						for(var i=0; i<p_array.length; i++){
-							result = result.concat(p_array[i].getConnectedObjs(new Array(Constants.OT_GRP,Constants.OT_PERS_TYPE), Constants.EDGES_TYP, null))
+							result = result.concat(p_array[i].getConnectedObjs(new Array(Constants.OT_GRP,Constants.OT_PERS_TYPE), Constants.EDGES_TYP, null));
 						}
-						return ArisData.Unique(result)
+						return ArisData.Unique(result);
 					}
 					function collect(p_array){
 						var result = new Array();
 						for(var i=0; i<p_array.length; i++){
 							result = result.concat(p_array[i].getConnectedObjs([Constants.OT_OBJECTIVE], Constants.EDGES_TYP, null))
 						}
-						return ArisData.Unique(result)
+						return ArisData.Unique(result);
 					}
 				}
 				
 		}
 		
 	if(Context.getSelectedFormat()==Constants.OUTEXCEL) {
-		p_output.EndTable(getString("ID_REPORTDEF_8"), 100, "", 10, Constants.C_BLACK, Constants.C_TRANSPARENT, 0, Constants.FMT_LEFT, 0)
-		xlTableActive=false
+		p_output.EndTable(getString("ID_REPORTDEF_8"), 100, "", 10, Constants.C_BLACK, Constants.C_TRANSPARENT, 0, Constants.FMT_LEFT, 0);
+		xlTableActive=false;
 	}
-	p_output.EndSection()
+	p_output.EndSection();
 
-
+}
 }
 
 
 function RGB(r, g, b) {
-	return (new java.awt.Color(r/255.0,g/255.0,b/255.0,1)).getRGB() & 0xFFFFFF
+	return (new java.awt.Color(r/255.0,g/255.0,b/255.0,1)).getRGB() & 0xFFFFFF;
 }
 
 
