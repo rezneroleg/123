@@ -89,13 +89,13 @@ function createSection1(p_output, p_aDatabase)
 		p_output.BeginParagraph( Constants.FMT_LEFT, 0.35, 0.71, 0, 0, 0)
 		p_output.OutputLn(getString("ID_REPORTDEF_6"), getString("ID_DEFAULT_FONT"), 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35)
 		p_output.EndParagraph()
-	if(Context.getSelectedFormat()!=Constants.OUTEXCEL){
+	if(Context.getSelectedFormat()!=Constants.OUTEXCEL)
 		p_output.EndTable("", 100, getString("ID_DEFAULT_FONT"), 10, Constants.C_BLACK, Constants.C_TRANSPARENT, 0, Constants.FMT_LEFT, 0)
-	}else{
-		p_output.TableRow();
+	else
+		p_output.TableRow()
 	// repetition of queried data:
 	for(var i=0; i<p_aDatabase.length; i++) {
-		iteration_group(p_output, ArisData.sort(p_aDatabase[i].Find(Constants.SEARCH_MODEL,[Constants.MT_VAL_ADD_CHN_DGM], Constants.AT_NAME, nLocale, "*_Окружение БП*", Constants.SEARCH_CMP_WILDCARDS),Constants.AT_NAME, nLocale));
+		iteration_group(p_output, ArisData.sort(p_aDatabase[i].Find(Constants.SEARCH_MODEL,[Constants.MT_VAL_ADD_CHN_DGM], Constants.AT_NAME, nLocale, "*_Окружение БП*", Constants.SEARCH_CMP_WILDCARDS),Constants.AT_NAME, nLocale))
 	}
 
 	// createSection1 local functions:
