@@ -1,0 +1,1002 @@
+
+var oOutput = Context.createOutputObject();
+var xlTableActive=false;
+
+oOutput.SetTitle(Context.getScriptInfo(Constants.SCRIPT_NAME));
+
+var nLocale = Context.getSelectedLanguage();
+
+
+
+
+
+
+ var aSelModels  = ArisData.getSelectedModels( Context.getDefinedItemTypes(Constants.CID_MODEL) );
+ var ga_ProcessModels    = [Constants.MT_VAL_ADD_CHN_DGM];
+ var g_nloc = 0;
+ var gn_Lang         = Context.getSelectedLanguage();
+
+
+var g_nloc = Context.getSelectedLanguage(); 
+var ogroupmodels = ArisData.getSelectedModels(); // выбранная пользователем группа моделей, на которых запущен скрипт
+var osinglemodel = ogroupmodels[0];              // выбираем первую модель из массива   
+var omodellistglobal = new Array();
+
+var ooutfile = null; 
+var txtCenterText = getString ("TEXT_1");        // Copyright надпись
+var txtCurrentYear = new Date().getFullYear();   // переменная текущего года
+var txtTypeDiagram = "Constants.MT_VAL_ADD_CHN_DGM";       // Название типа диаграммы цепочки добавленного качества
+var txtCity = getString ("TEXT_5");              // Название города
+//AS20160209
+var ed = getString ("TEXT_6");  // В электром виде - объекты типа электронный документ
+
+/* итоговые переменные всего функицй, автоматизированных функций, подлежащих автоматизации функции,
+неавтоматизированных функциий, контрольных функций */
+var totfunc = 0, totavtfunc = 0, totshldavtfunc = 0, totnoavtfunc = 0, totcontrolfunc = 0;
+var ident = ""; // переменная для нумерации модели
+var identBool = true;
+
+var groupfuncobjects = osinglemodel.ObjOccListFilter(Constants.OT_FUNC); // фильтр только функции
+var ooutobjocclist = new Array();
+var ooutobjocclist1 = new Array();
+var oinpobjocclist = new Array();
+var firstcolmatrixagr = new Array("Соответствие модели БП целям описания БП, указанным в ходатайстве");
+var expertnum;
+var ocurrentobj;
+var bstrdesc;
+//var strRegExp = new SearchRegExp();
+
+
+var aSelModels  = ArisData.getSelectedModels( Context.getDefinedItemTypes(Constants.CID_MODEL) )
+
+
+
+
+
+function main() {
+    
+    Context.setProperty("use-new-output", true);
+    ooutfile = Context.createOutputObject(Context.getSelectedFormat(), Context.getSelectedFile());
+    ooutfile.Init(Context.getSelectedLanguage());
+   
+    
+    
+        var hld_oOutputFile     = new __holder( ooutfile );
+        var hld_nOutGraphic     = new __holder(0);
+        var hld_nAssgnLevel     = new __holder(0);
+            hld_nOutGraphic.value   = true ;
+            hld_nAssgnLevel.value   = 1;
+       
+    
+    
+    //сортируем по расположению объектов в модели
+    groupfuncobjects = ArisData.sort(groupfuncobjects, Constants.AT_HIER_NUM, Constants.SORT_GEOMETRIC, g_nloc);
+    
+    // Создаем объект типа *.doc
+    
+    ooutfile.Init(g_nloc);
+    
+    // Параметры страницы  
+    //PortraitPage(false, ooutfile);
+    ooutfile.SetPrintScaling(120);
+    
+ooutfile.DefineF("ID_STYLE_RD_HEADER_FOOTER", "Times New Roman", 10, Constants.C_TRANSPARENT,  Constants.FMT_LEFT| Constants.FMT_VTOP, 0, 0, 0, 0, 0,0, 1);
+ooutfile.DefineF("ID_STYLE_RD_DEFAULT", "Times New Roman", 11,  Constants.C_TRANSPARENT,  Constants.FMT_LEFT| Constants.FMT_VTOP, 0, 0, 0, 0, 0,0, 1);
+ooutfile.DefineF("ID_STYLE_RD_TABLE_HEAD", "Times New Roman", 8,  Constants.C_TRANSPARENT,  Constants.FMT_BOLD | Constants.FMT_CENTER| Constants.FMT_VTOP, 0, 0, 0, 0, 0, 0,1);
+ooutfile.DefineF("ID_STYLE_RD_TABLE_CONTENT","Times New Roman", 8,  Constants.C_TRANSPARENT,  Constants.FMT_LEFT| Constants.FMT_VTOP, 0, 0, 0, 0, 0,0,1);
+ooutfile.DefineF("ID_STYLE_RD_INFO", "Times New Roman", 14,  Constants.C_TRANSPARENT,  Constants.FMT_BOLD | Constants.FMT_CENTER| Constants.FMT_VTOP, 0, 0, 1.76, 8.82, 0,0, 1);
+ooutfile.DefineF("ID_STYLE_RD_HEADING_3", "Times New Roman", 12,  Constants.C_TRANSPARENT,  Constants.FMT_ITALIC | Constants.FMT_BOLD | Constants.FMT_LEFT| Constants.FMT_VTOP| Constants.FMT_TOCENTRY2 , 0, 0, 1, 1, 0, 0,1);
+ooutfile.DefineF("ID_STYLE_RD_HEADING_4", "Times New Roman", 12,  Constants.C_TRANSPARENT,  Constants.FMT_ITALIC | Constants.FMT_BOLD | Constants.FMT_LEFT| Constants.FMT_VTOP| Constants.FMT_TOCENTRY3 , 0, 0, 0, 0, 0, 0,1);
+ooutfile.DefineF("ID_STYLE_RD_HEADING_1", "Times New Roman", 18,  Constants.C_TRANSPARENT,  Constants.FMT_BOLD | Constants.FMT_LEFT| Constants.FMT_VTOP| Constants.FMT_TOCENTRY0 , 0, 0, 4, 4, 0, 0,1);
+ooutfile.DefineF("ID_STYLE_RD_TITLE", "Times New Roman", 21,  Constants.C_TRANSPARENT,  Constants.FMT_BOLD | Constants.FMT_CENTER| Constants.FMT_VTOP, 0, 0, 1.76, 8.82, 0, 0,1);
+ooutfile.DefineF("ID_STYLE_RD_HEADING_2", "Times New Roman", 14,  Constants.C_TRANSPARENT,  Constants.FMT_ITALIC | Constants.FMT_BOLD | Constants.FMT_LEFT| Constants.FMT_VTOP| Constants.FMT_TOCENTRY1 , 0, 0, 2, 2, 0, 0,1);
+//setupOutputObject( oOutput ); 
+    //	Cтили, используемые для вывода заголовков и таблиц
+    ooutfile.DefineF("Heading 0", "Times New Roman",12,Constants.C_BLACK,Constants.C_WHITE,Constants.FMT_BOLD | Constants.FMT_LEFT,0,0,0,0,0,0);
+    ooutfile.DefineF("Heading 1", "Times New Roman",12,Constants.C_BLACK,Constants.C_WHITE,Constants.FMT_BOLD | Constants.FMT_LEFT,0,0,0,0,0,0);
+    ooutfile.DefineF("Heading 2", "Times New Roman",12,Constants.C_BLACK,Constants.C_WHITE,Constants.FMT_BOLD | Constants.FMT_LEFT,0,0,0,0,0,0);
+    ooutfile.DefineF("Heading 3", "Times New Roman",12,Constants.C_BLACK,Constants.C_WHITE,Constants.FMT_BOLD | Constants.FMT_LEFT,0,0,0,0,0,0);
+    ooutfile.DefineF("Heading 4", "Times New Roman",12,Constants.C_BLACK,Constants.C_WHITE,Constants.FMT_BOLD | Constants.FMT_LEFT,0,0,0,0,0,0);
+    ooutfile.DefineF("Heading 5", "Times New Roman",12,Constants.C_BLACK,Constants.C_WHITE,Constants.FMT_BOLD | Constants.FMT_LEFT,0,0,0,0,0,0);
+    ooutfile.DefineF("Heading 6", "Times New Roman",12,Constants.C_BLACK,Constants.C_WHITE,Constants.FMT_BOLD | Constants.FMT_LEFT,0,0,0,0,0,0);
+    ooutfile.DefineF("Heading 7", "Times New Roman",12,Constants.C_BLACK,Constants.C_WHITE,Constants.FMT_BOLD | Constants.FMT_LEFT,0,0,0,0,0,0);
+    ooutfile.DefineF("Heading 8", "Times New Roman",12,Constants.C_BLACK,Constants.C_WHITE,Constants.FMT_BOLD | Constants.FMT_LEFT,0,0,0,0,0,0);
+    ooutfile.DefineF("Heading 9", "Times New Roman",12,Constants.C_BLACK,Constants.C_WHITE,Constants.FMT_BOLD | Constants.FMT_LEFT,0,0,0,0,0,0);
+    ooutfile.DefineF("TableTop", "Times New Roman",10,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_BOLD | Constants.FMT_CENTER,0,0,0,0,0,1);
+    ooutfile.DefineF("TableEnd", "Times New Roman",13,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_BOLD | Constants.FMT_CENTER,0,0,0,0,0,1);
+    ooutfile.DefineF("TableLeftEnd", "Times New Roman",13,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_BOLD | Constants.FMT_LEFT,0,0,0,0,0,1);
+    ooutfile.DefineF("TableBottom", "Times New Roman",10,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_BOLD | Constants.FMT_LEFT,0,0,0,0,0,1);
+    //AS20160201
+    ooutfile.DefineF("TableBottom2", "Times New Roman",10,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_UNDERLINE | Constants.FMT_BOLD | Constants.FMT_LEFT,0,0,0,0,0,1);
+    
+    ooutfile.DefineF("Pic", "Times New Roman", 12,Constants.C_BLACK, Constants.C_TRANSPARENT, Constants.FMT_LEFT, 0,0,0,0,0,1);
+    
+    ooutfile.DefineF("TableMain", "Times New Roman",10,Constants.C_BLACK,Constants.C_WHITE,Constants.FMT_LEFT,0,0,0,0,0,1);
+    ooutfile.DefineF("TableMain_2", "Times New Roman",10,Constants.C_BLACK,Constants.C_WHITE,Constants.FMT_JUSTIFY,0,0,0,0,0,1);
+    ooutfile.DefineF("TableAttn", "Times New Roman",10,Constants.C_RED,Constants.C_WHITE,Constants.FMT_LEFT,0,0,0,0,0,1);
+    ooutfile.DefineF("Header", "Times New Roman",15,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_CENTER,0,0,0,0,0,1);
+    ooutfile.DefineF("HeaderMatrix", "Times New Roman",12,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_CENTER,0,0,0,0,0,1);
+    ooutfile.DefineF("StringTable1", "Times New Roman",12,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_LEFT,0,0,0,0,0,1);
+    ooutfile.DefineF("StringTable2", "Times New Roman",12,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_CENTER,0,0,0,0,0,1);
+    ooutfile.DefineF("Footer", "Times New Roman",12,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_CENTER,0,0,0,0,0,1);
+    ooutfile.DefineF("Title 1", "Times New Roman",15,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_LEFT,95,0,0,0,0,1);      
+    ooutfile.DefineF("Title 2", "Times New Roman",15,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_RIGHT,0,0,0,0,0,0);
+    ooutfile.DefineF("Title 3", "Times New Roman",15,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_CENTER,0,0,0,0,0,1);
+    ooutfile.DefineF("Title 4", "Times New Roman",15,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_LEFT,95,0,0,0,0,1);
+    ooutfile.DefineF("Title 5", "Times New Roman",14,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_JUSTIFY,0,0,0,0,0,1);
+    
+    if (ogroupmodels.length > 0) {
+        userdialog();
+        if (bcheckuserdialog) {
+            title(); 
+            ToC(ooutfile);  
+            if (osinglemodel.Type()== "Value-added chain diagram") {
+            
+            var aSelModels  = ArisData.getSelectedModels( Context.getDefinedItemTypes(Constants.CID_MODEL) );
+            
+            outputDataPerModel1( aSelModels, hld_oOutputFile, hld_nOutGraphic.value, hld_nAssgnLevel.value, 0 );
+            createSection1(ooutfile, ArisData.getActiveDatabase());
+            outputDataPerModel2( aSelModels, hld_oOutputFile, hld_nOutGraphic.value, hld_nAssgnLevel.value, 0 );
+            outputDataPerModel3( aSelModels, hld_oOutputFile, hld_nOutGraphic.value, hld_nAssgnLevel.value, 0 );
+            outputDataPerModel32( aSelModels, hld_oOutputFile, hld_nOutGraphic.value, hld_nAssgnLevel.value, 0 );
+            outputDataPerModel33( aSelModels, hld_oOutputFile, hld_nOutGraphic.value, hld_nAssgnLevel.value, 0 );
+            outputDataPerModel4( aSelModels, hld_oOutputFile, hld_nOutGraphic.value, hld_nAssgnLevel.value, 0 );
+            outputDataPerModelP( aSelModels, hld_oOutputFile, hld_nOutGraphic.value, hld_nAssgnLevel.value, 0 );
+            } 	
+                      
+         ooutfile.WriteReport(Context.getSelectedPath(), Context.getSelectedFile());
+        } else {
+            Context.setScriptError(Constants.ERR_NOFILECREATED);
+        }
+    } else {
+        Dialogs.MsgBox("Выберите, пожалуйста, модель",Constants.MSGBOX_BTN_OK,"ARIS Report");
+        Context.setScriptError(Constants.ERR_NOFILECREATED);  
+    }  
+
+
+function title()
+{  
+    var txtCity = getString ("TEXT_5"); // город
+    
+    // Вывод приказа для ЛПА
+    ooutfile.BeginSection(false, Constants.SECTION_DEFAULT);
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("Об утверждении Регламента","Title 5");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("            В целях надлежащей организации работы в ОАО «Белагропромбанк», развития процессного управления,","Title 5");
+    ooutfile.OutputLnF("ПРИКАЗЫВАЮ:","Title 5"); 
+    ooutfile.OutputLnF("            1. Утвердить прилагаемый Регламент бизнес-процесса «"+osinglemodel.Name(g_nloc)+
+    "» (далее – Регламент) и установить, что он вступает в силу с момента утверждения.","Title 5");         
+    ooutfile.OutputLnF("            2. Руководителям структурных подразделений центрального аппарата и региональных дирекций"+
+    " ОАО «Белагропромбанк» довести Регламент до заинтересованных.","Title 5");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("Председатель Правления	                             А.А.Лысюк","Title 5");
+    ooutfile.EndSection();
+    
+    // Вывод титульного листа
+    ooutfile.BeginSection(false, Constants.SECTION_COVER);
+    ooutfile.OutputLnF("УТВЕРЖДЕНО","Title 1"); 
+    ooutfile.OutputLnF("Распоряжение","Title 4");
+    ooutfile.OutputLnF("Председателя Правления","Title 4");
+    ooutfile.OutputLnF("ОАО «Белагропромбанк»","Title 4"); 
+    ooutfile.OutputLnF("___.___.______ № ____","Title 4");         
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");                
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("БИЗНЕС-МОДЕЛЬ","Title 2");                
+    ooutfile.OutputLnF("ОАО \«Белагропромбанк\»","Title 2");                
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+   // ooutfile.OutputLnF (osinglemodel.Name(g_nloc),"Header"); // выводим на титульном листе название модели
+    ooutfile.OutputLnF ("Модель (дерево) бизнес-процессов ОАО «Белагропромбанк»","Header"); // выводим на титульном листе название модели
+    ooutfile.OutputLnF ("верхнего уровня в состоянии «как есть»","Header"); // выводим на титульном листе название модели
+    ooutfile.OutputLnF("","Title 2");                
+    ooutfile.OutputLnF("","Title 2");             
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");
+    ooutfile.OutputLnF("","Title 2");                
+    ooutfile.OutputLnF(txtCity,"Title 3");             
+    ooutfile.OutputLnF(txtCurrentYear,"Title 3");       
+    ooutfile.EndSection();
+    
+        
+}    
+
+function userdialog()
+{
+    
+    var bInput = false ;	
+    var listbox = new Array(1,2,3,4,5,6,7,8,9); 
+    var txtDialogTitle = getString ("TEXT_3"); // Название диалогового пользовательского окна    
+    var dialoglogo = Context.getFile("LogoAPB.JPG",Constants.LOCATION_COMMON_FILES);
+    
+    var userdialog = Dialogs.createNewDialogTemplate(600, 170, txtDialogTitle);
+    userdialog.Picture(1,2,220,25, "LOGO");    
+    userdialog.CheckBox(50,30,520,14,"Выводить в отчет вложенную модель, на которую ссылается PI и в поле TEXT IN", "Check1");
+    userdialog.CheckBox(50,45,490,14,"Выводить в отчет таблицу уровня автоматизации БП", "Check2");
+    userdialog.CheckBox(50,60,490,14, "Выводить в отчет итоговую таблицу степени автоматизации БП", "Check3");
+    userdialog.CheckBox(50,75,490,14, "Выводить список детализирующих моделей - модели VAD", "Check4");
+    userdialog.CheckBox(50,90,490,14, "Выводить только функции, требующие автоматизации", "Check5");
+    userdialog.Text(50,118,320,14,"Количество экспертов (включая владельца)");
+    userdialog.ComboBox(325,120,55,16,listbox ,"Text0");
+    userdialog.Text(50,138,335,14,"Стартовый номер подпроцесса");
+    userdialog.TextBox(327,140,70,16, "Text1", 0);
+    userdialog.OKButton();
+    userdialog.CancelButton();
+    
+    dlgGroupInfo = Dialogs.createUserDialog(userdialog);
+    dlgGroupInfo.setDlgPicture("LOGO", dialoglogo, 1);
+    dlgGroupInfo.setDlgValue(1, true);
+    dlgGroupInfo.setDlgValue(2, false);
+    dlgGroupInfo.setDlgValue(3, false);
+    dlgGroupInfo.setDlgValue(4, true);
+    dlgGroupInfo.setDlgText(7,"1");
+    dlgGroupInfo.setDlgText(9,"1.");
+    
+    var nuserdialog=Dialogs.show(dlgGroupInfo);
+    
+    if (nuserdialog != 0) {
+        bcheckuserdialog = true;    
+        expertnum=dlgGroupInfo.getDlgText("Text0");
+        expertnum++;
+        ident=dlgGroupInfo.getDlgText("Text1");
+        bpicheck=(dlgGroupInfo.getDlgValue("Check1") == 1);
+        bcheck2=(dlgGroupInfo.getDlgValue("Check2") == 1);
+        bcheck3=(dlgGroupInfo.getDlgValue("Check3") == 1);
+        bcheck4=(dlgGroupInfo.getDlgValue("Check4") == 1);
+        bcheck5=(dlgGroupInfo.getDlgValue("Check5") == 1);
+    } else {bcheckuserdialog=false;}
+}   
+
+
+
+
+
+
+function outputDataPerModel( p_aSelModels, hld_oOutputFile, p_bOutGraphic, p_nAsgnLevel, p_nActLevel ){
+        var p_Output    = hld_oOutputFile.value;
+        p_aSelModels.sort( sortDefsNames );
+        if( p_aSelModels.length < 1 )   return;
+        
+        for(var i=0; i<p_aSelModels.length; i++){
+            ooutfile.BeginSection(false, Constants.SECTION_DEFAULT);
+                Footer(ooutfile);
+                outputGraphic( p_aSelModels[i], p_nActLevel );
+               
+           ooutfile.EndSection();
+        }//END::for_i
+        
+     function outputGraphic(p_Model, p_nLevel){
+            var    opicture = p_Model.Graphic(false,false,g_nloc);
+            if (p_aSelModels[0].Flags() & Constants.MODEL_PRINT_LANDSCAPE) {
+                ooutfile.BeginSection(false, Constants.SECTION_DEFAULT);
+                LandscapePage(false, ooutfile);
+                Footer(ooutfile);
+             //   ooutfile.BeginParagraph(Constants.FMT_CENTER,0,0,0,0,0);
+                ooutfile.OutputLnF( p_Model.Name(g_nloc),"Heading 1" );
+                ooutfile.OutGraphic(opicture,-1,257,150);
+              //  ooutfile.EndParagraph();
+                ooutfile.EndSection();
+            } else {
+               
+                ooutfile.BeginSection(false, Constants.SECTION_DEFAULT);
+                PortraitPage(false, ooutfile);
+                Footer(ooutfile);
+          //      ooutfile.BeginParagraph(Constants.FMT_CENTER,0,0,0,0,0);
+                ooutfile.OutputLnF( p_Model.Name(g_nloc),"Heading 1" );
+                ooutfile.OutGraphic(opicture,-1,165,240);
+            //    ooutfile.EndParagraph();
+                ooutfile.EndSection();
+            }
+ 
+        }//END::outputGraphic()::outputDataPerModel()
+
+        
+    }//END::outputDataPerModel()
+ 
+    
+   
+           
+function outputDataPerModel1( p_aSelModels, hld_oOutputFile, p_bOutGraphic, p_nAsgnLevel, p_nActLevel ){
+        var p_Output    = hld_oOutputFile.value;
+        p_aSelModels.sort( sortDefsNames );
+        if( p_aSelModels.length < 1 )   return;
+        
+        for(var i=0; i<p_aSelModels.length; i++){
+            ooutfile.BeginSection(false, Constants.SECTION_DEFAULT);
+          
+            var aAsgnModels     = getModelAssProcesses1( p_aSelModels[i], ga_ProcessModels );
+            var g_nloc = __toLong(Context.getSelectedLanguage());
+                Footer(ooutfile);
+               // outputGraphic( p_aSelModels[i], p_nActLevel );
+                if( (aAsgnModels.length > 0) && (p_nActLevel < p_nAsgnLevel) ){
+                    p_nActLevel++;
+                   outputDataPerModel( aAsgnModels, hld_oOutputFile, p_bOutGraphic, p_nAsgnLevel, p_nActLevel ); 
+                    p_nActLevel--;
+                }
+           ooutfile.EndSection();
+        }//END::for_i 
+   }
+    
+function getModelAssProcesses1( p_Model, p_Types ){
+        var aOut        = new Array();
+        var aOut1        = new Array();
+        var aAllOccs    = p_Model.ObjOccList();
+        g_nloc = __toLong(Context.getSelectedLanguage());
+        for(var i=0; i<aAllOccs.length; i++){
+            if( aAllOccs[i].SymbolNum() == Constants.ST_PRCS_IF )   continue;
+            var aAsgnModels = aAllOccs[i].ObjDef().AssignedModels( p_Types );
+            for(var j=0; j<aAsgnModels.length; j++){
+                if( aOut.contains( aAsgnModels[j] ) == false && aAsgnModels[j].Name(g_nloc).startsWith("1.")) { aOut.push( aAsgnModels[j] ); }
+            }//END::for_j
+        }//END::for_i
+        return aOut;
+    }//END::getModelAssProcesses()
+
+      
+function outputDataPerModel2( p_aSelModels, hld_oOutputFile, p_bOutGraphic, p_nAsgnLevel, p_nActLevel ){
+        var p_Output    = hld_oOutputFile.value;
+        p_aSelModels.sort( sortDefsNames );
+        if( p_aSelModels.length < 1 )   return;
+        
+        for(var i=0; i<p_aSelModels.length; i++){
+            ooutfile.BeginSection(false, Constants.SECTION_DEFAULT);
+          
+            var aAsgnModels     = getModelAssProcesses2( p_aSelModels[i], ga_ProcessModels );
+            var g_nloc = __toLong(Context.getSelectedLanguage());
+                Footer(ooutfile);
+         //       outputGraphic( p_aSelModels[i], p_nActLevel );
+                if( (aAsgnModels.length > 0) && (p_nActLevel < p_nAsgnLevel) ){
+                    p_nActLevel++;
+                   outputDataPerModel( aAsgnModels, hld_oOutputFile, p_bOutGraphic, p_nAsgnLevel, p_nActLevel ); 
+                    p_nActLevel--;
+                }
+           ooutfile.EndSection();
+        }//END::for_i        
+ }       
+ function getModelAssProcesses2( p_Model, p_Types ){
+        var aOut        = new Array();
+        var aOut1        = new Array();
+        var aAllOccs    = p_Model.ObjOccList();
+        g_nloc = __toLong(Context.getSelectedLanguage());
+        for(var i=0; i<aAllOccs.length; i++){
+            if( aAllOccs[i].SymbolNum() == Constants.ST_PRCS_IF )   continue;
+            var aAsgnModels = aAllOccs[i].ObjDef().AssignedModels( p_Types );
+            for(var j=0; j<aAsgnModels.length; j++){
+                if( aOut.contains( aAsgnModels[j] ) == false && aAsgnModels[j].Name(g_nloc).startsWith("2.")) { aOut.push( aAsgnModels[j] ); }
+            }//END::for_j
+        }//END::for_i
+        return aOut;
+    }//END::getModelAssProcesses()       
+        
+        
+ 
+
+function outputDataPerModel3( p_aSelModels, hld_oOutputFile, p_bOutGraphic, p_nAsgnLevel, p_nActLevel ){
+        var p_Output    = hld_oOutputFile.value;
+        p_aSelModels.sort( sortDefsNames );
+        if( p_aSelModels.length < 1 )   return;
+        
+        for(var i=0; i<p_aSelModels.length; i++){
+            ooutfile.BeginSection(false, Constants.SECTION_DEFAULT);
+          
+            var aAsgnModels     = getModelAssProcesses3( p_aSelModels[i], ga_ProcessModels );
+            var g_nloc = __toLong(Context.getSelectedLanguage());
+                Footer(ooutfile);
+         //       outputGraphic( p_aSelModels[i], p_nActLevel );
+                if( (aAsgnModels.length > 0) && (p_nActLevel < p_nAsgnLevel) ){
+                    p_nActLevel++;
+                   outputDataPerModel( aAsgnModels, hld_oOutputFile, p_bOutGraphic, p_nAsgnLevel, p_nActLevel ); 
+                    p_nActLevel--;
+                }
+           ooutfile.EndSection();
+        }//END::for_i        
+ }       
+ function getModelAssProcesses3( p_Model, p_Types ){
+        var aOut        = new Array();
+        var aOut1        = new Array();
+        var aAllOccs    = p_Model.ObjOccList();
+        g_nloc = __toLong(Context.getSelectedLanguage());
+        for(var i=0; i<aAllOccs.length; i++){
+            if( aAllOccs[i].SymbolNum() == Constants.ST_PRCS_IF )   continue;
+            var aAsgnModels = aAllOccs[i].ObjDef().AssignedModels( p_Types );
+            for(var j=0; j<aAsgnModels.length; j++){
+                if( aOut.contains( aAsgnModels[j] ) == false && aAsgnModels[j].Name(g_nloc).startsWith("3. ") || aAsgnModels[j].Name(g_nloc).startsWith("3.1.")) { aOut.push( aAsgnModels[j] ); }
+            }//END::for_j
+        }//END::for_i
+        return aOut;
+    }//END::getModelAssProcesses()     
+
+
+function outputDataPerModel32( p_aSelModels, hld_oOutputFile, p_bOutGraphic, p_nAsgnLevel, p_nActLevel ){
+        var p_Output    = hld_oOutputFile.value;
+        p_aSelModels.sort( sortDefsNames );
+        if( p_aSelModels.length < 1 )   return;
+        
+        for(var i=0; i<p_aSelModels.length; i++){
+            ooutfile.BeginSection(false, Constants.SECTION_DEFAULT);
+          
+            var aAsgnModels     = getModelAssProcesses32( p_aSelModels[i], ga_ProcessModels );
+            var g_nloc = __toLong(Context.getSelectedLanguage());
+                Footer(ooutfile);
+         //       outputGraphic( p_aSelModels[i], p_nActLevel );
+                if( (aAsgnModels.length > 0) && (p_nActLevel < p_nAsgnLevel) ){
+                    p_nActLevel++;
+                   outputDataPerModel( aAsgnModels, hld_oOutputFile, p_bOutGraphic, p_nAsgnLevel, p_nActLevel ); 
+                    p_nActLevel--;
+                }
+           ooutfile.EndSection();
+        }//END::for_i        
+ }       
+ function getModelAssProcesses32( p_Model, p_Types ){
+        var aOut        = new Array();
+        var aOut1        = new Array();
+        var aAllOccs    = p_Model.ObjOccList();
+        g_nloc = __toLong(Context.getSelectedLanguage());
+        for(var i=0; i<aAllOccs.length; i++){
+            if( aAllOccs[i].SymbolNum() == Constants.ST_PRCS_IF )   continue;
+            var aAsgnModels = aAllOccs[i].ObjDef().AssignedModels( p_Types );
+            for(var j=0; j<aAsgnModels.length; j++){
+                if( aOut.contains( aAsgnModels[j] ) == false && aAsgnModels[j].Name(g_nloc).startsWith("3.2.")) { aOut.push( aAsgnModels[j] ); }
+            }//END::for_j
+        }//END::for_i
+        return aOut;
+    }//END::getModelAssProcesses()     
+
+    
+function outputDataPerModel33( p_aSelModels, hld_oOutputFile, p_bOutGraphic, p_nAsgnLevel, p_nActLevel ){
+        var p_Output    = hld_oOutputFile.value;
+        p_aSelModels.sort( sortDefsNames );
+        if( p_aSelModels.length < 1 )   return;
+        
+        for(var i=0; i<p_aSelModels.length; i++){
+            ooutfile.BeginSection(false, Constants.SECTION_DEFAULT);
+          
+            var aAsgnModels     = getModelAssProcesses33( p_aSelModels[i], ga_ProcessModels );
+            var g_nloc = __toLong(Context.getSelectedLanguage());
+                Footer(ooutfile);
+         //       outputGraphic( p_aSelModels[i], p_nActLevel );
+                if( (aAsgnModels.length > 0) && (p_nActLevel < p_nAsgnLevel) ){
+                    p_nActLevel++;
+                   outputDataPerModel( aAsgnModels, hld_oOutputFile, p_bOutGraphic, p_nAsgnLevel, p_nActLevel ); 
+                    p_nActLevel--;
+                }
+           ooutfile.EndSection();
+        }//END::for_i        
+ }       
+ function getModelAssProcesses33( p_Model, p_Types ){
+        var aOut        = new Array();
+        var aOut1        = new Array();
+        var aAllOccs    = p_Model.ObjOccList();
+        g_nloc = __toLong(Context.getSelectedLanguage());
+        for(var i=0; i<aAllOccs.length; i++){
+            if( aAllOccs[i].SymbolNum() == Constants.ST_PRCS_IF )   continue;
+            var aAsgnModels = aAllOccs[i].ObjDef().AssignedModels( p_Types );
+            for(var j=0; j<aAsgnModels.length; j++){
+                if( aOut.contains( aAsgnModels[j] ) == false && aAsgnModels[j].Name(g_nloc).startsWith("3.3.")) { aOut.push( aAsgnModels[j] ); }
+            }//END::for_j
+        }//END::for_i
+        return aOut;
+    }//END::getModelAssProcesses() 
+
+ 
+function outputDataPerModel4( p_aSelModels, hld_oOutputFile, p_bOutGraphic, p_nAsgnLevel, p_nActLevel ){
+        var p_Output    = hld_oOutputFile.value;
+        p_aSelModels.sort( sortDefsNames );
+        if( p_aSelModels.length < 1 )   return;
+        
+        for(var i=0; i<p_aSelModels.length; i++){
+            ooutfile.BeginSection(false, Constants.SECTION_DEFAULT);
+          
+            var aAsgnModels     = getModelAssProcesses4( p_aSelModels[i], ga_ProcessModels );
+            var g_nloc = __toLong(Context.getSelectedLanguage());
+                Footer(ooutfile);
+         //       outputGraphic( p_aSelModels[i], p_nActLevel );
+                if( (aAsgnModels.length > 0) && (p_nActLevel < p_nAsgnLevel) ){
+                    p_nActLevel++;
+                   outputDataPerModel( aAsgnModels, hld_oOutputFile, p_bOutGraphic, p_nAsgnLevel, p_nActLevel ); 
+                    p_nActLevel--;
+                }
+           ooutfile.EndSection();
+        }//END::for_i        
+ }       
+ function getModelAssProcesses4( p_Model, p_Types ){
+        var aOut        = new Array();
+        var aOut1        = new Array();
+        var aAllOccs    = p_Model.ObjOccList();
+        g_nloc = __toLong(Context.getSelectedLanguage());
+        for(var i=0; i<aAllOccs.length; i++){
+            if( aAllOccs[i].SymbolNum() == Constants.ST_PRCS_IF )   continue;
+            var aAsgnModels = aAllOccs[i].ObjDef().AssignedModels( p_Types );
+            for(var j=0; j<aAsgnModels.length; j++){
+                if( aOut.contains( aAsgnModels[j] ) == false && aAsgnModels[j].Name(g_nloc).startsWith("4.")) { aOut.push( aAsgnModels[j] ); }
+            }//END::for_j
+        }//END::for_i
+        return aOut;
+    }//END::getModelAssProcesses() 
+   
+
+ function outputDataPerModelP( p_aSelModels, hld_oOutputFile, p_bOutGraphic, p_nAsgnLevel, p_nActLevel ){
+        var p_Output    = hld_oOutputFile.value;
+        p_aSelModels.sort( sortDefsNames );
+        if( p_aSelModels.length < 1 )   return;
+        
+        for(var i=0; i<p_aSelModels.length; i++){
+            ooutfile.BeginSection(false, Constants.SECTION_DEFAULT);
+                Footer(ooutfile);
+                outputGraphicP( p_aSelModels[i], p_nActLevel );
+               
+           ooutfile.EndSection();
+        }//END::for_i
+        
+     function outputGraphicP(p_Model, p_nLevel){
+            var    opicture = p_Model.Graphic(false,false,g_nloc);
+            if (p_aSelModels[0].Flags() & Constants.MODEL_PRINT_LANDSCAPE) {
+                ooutfile.BeginSection(false, Constants.SECTION_DEFAULT);
+                LandscapePage(false, ooutfile);
+                Footer(ooutfile);
+             //   ooutfile.BeginParagraph(Constants.FMT_CENTER,0,0,0,0,0);
+                ooutfile.OutputLnF( "Бизнес-процессы ОАО «Белагропромбанк» первого уровня","Heading 1" );
+                ooutfile.OutGraphic(opicture,-1,257,150);
+              //  ooutfile.EndParagraph();
+                ooutfile.EndSection();
+            } else {
+               
+                ooutfile.BeginSection(false, Constants.SECTION_DEFAULT);
+                PortraitPage(false, ooutfile);
+                Footer(ooutfile);
+          //      ooutfile.BeginParagraph(Constants.FMT_CENTER,0,0,0,0,0);
+                ooutfile.OutputLnF( p_Model.Name(g_nloc),"Heading 1" );
+                ooutfile.OutGraphic(opicture,-1,165,240);
+            //    ooutfile.EndParagraph();
+                ooutfile.EndSection();
+            }
+ 
+        }//END::outputGraphic()::outputDataPerModel()
+
+        
+    }//END::outputDataPerModel()
+ 
+      
+   
+   
+   
+   
+function sortDefsNames( a, b ){
+        var valA    = getAttrStrValue( a, Constants.AT_NAME, gn_Lang );
+        var valB    = getAttrStrValue( b, Constants.AT_NAME, gn_Lang );
+        return valA.compareToIgnoreCase( valB );
+    }//END::sortDefsNames()
+
+function getAttrStrValue(p_objDef, p_attrTypeNum, p_Lang){
+        var attr    = p_objDef.Attribute(p_attrTypeNum, p_Lang, true);
+        if(attr.IsValid() == false) return gs_Empty;
+        return Packages.java.lang.String( attr.GetValue(true) );//convToBytes( attr.GetValue(true) ) );
+    }//END::getAttrStrValue()    
+ 
+function getFStyle(p_Level){
+        if (p_Level == 0) return "Heading 0";
+        if (p_Level == 1) return "Heading 1";
+        if (p_Level == 2) return "Heading 2";
+        return "Heading 3";
+    } 
+ 
+ 
+ 
+
+
+
+function LandscapePage(beginsection, outfile) {
+    
+    if (beginsection == true) outfile.BeginSection(true, Constants.SECTION_DEFAULT);
+    outfile.SetPageWidth(297);	 
+    outfile.SetPageHeight(210);
+    outfile.SetLeftMargin(20);
+    outfile.SetRightMargin(20);
+    outfile.SetTopMargin(30);
+    outfile.SetBottomMargin(10);
+    outfile.SetDistFooter(10);
+}
+
+function PortraitPage(beginsection, outfile) {
+    
+    if (beginsection == true) outfile.BeginSection(true, Constants.SECTION_DEFAULT);    
+    outfile.SetPageWidth(210);	 
+    outfile.SetPageHeight(297);
+    outfile.SetLeftMargin(30);
+    outfile.SetRightMargin(10);
+    outfile.SetTopMargin(20);
+    outfile.SetBottomMargin(20);
+    outfile.SetDistFooter(10);
+}    
+
+function EndSection(outfile) {
+    
+    outfile.EndSection();  
+}
+
+function Footer(outfile) {
+    
+    var image = undefined;
+    outfile.BeginFooter();
+    outfile.BeginTable(100,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_CENTER,0);
+    outfile.TableRow();
+    outfile.TableCellF("",35,"Footer");
+    image = Context.createPicture("LogoAPB.jpg");
+    outfile.OutGraphic(image,-1,30,30);
+    outfile.TableCellF("",35,"Footer");
+    outfile.BeginParagraph(Constants.FMT_CENTER,0,0,0,0,0);
+    outfile.OutputF(getString("TEXT_1"),"Footer");
+    outfile.EndParagraph();
+    outfile.TableCellF("",30,"Footer");
+    outfile.BeginParagraph(Constants.FMT_CENTER,0,0,0,0,0);
+    outfile.OutputF("Стр.","Footer");
+    ooutfile.OutputField(Constants.FIELD_PAGE,"Times New Roman",12,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_CENTER);
+    outfile.OutputF(" из ","Footer");
+    ooutfile.OutputField(Constants.FIELD_NUMPAGES,"Times New Roman",12,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_CENTER);
+    outfile.EndParagraph();
+    outfile.EndTable("",100,"Times New Roman",12,Constants.C_BLACK,Constants.C_TRANSPARENT,0,Constants.FMT_CENTER,0);
+    outfile.EndFooter();
+}
+
+function ToC(ooutfile) {
+    ooutfile.BeginSection(false, Constants.SECTION_INDEX);
+    Footer(ooutfile);
+    ooutfile.SetAutoTOCNumbering(false);
+    for (var i=0; i<=3; i++)
+        ooutfile.SetTOCFormat(i, "Times New Roman", 10 , Constants.C_BLACK, Constants.C_WHITE, Constants.FMT_LEFT, i*3, 0, 0, 0);
+    ooutfile.OutputLn("Содержание", "Times New Roman",12,Constants.C_BLACK,Constants.C_TRANSPARENT,Constants.FMT_BOLD | Constants.FMT_LEFT,0);
+    ooutfile.OutputField(Constants.FIELD_TOC, "Times New Roman",10, Constants.C_BLACK, Constants.C_WHITE, Constants.FMT_LEFT);
+    ooutfile.EndSection();  
+}
+
+
+
+
+
+
+
+
+function setupOutputObject(outputObj)
+{
+	outputObj.SetPageWidth(297.20);
+	outputObj.SetPageHeight(210.10);
+	outputObj.SetLeftMargin(20);
+	outputObj.SetRightMargin(20);
+	outputObj.SetTopMargin(20);
+	outputObj.SetBottomMargin(10);
+	outputObj.SetDistHeader(10);
+	outputObj.SetDistFooter(10);
+	outputObj.SetAutoTOCNumbering(true);
+	globalHeader(outputObj);
+
+	globalFooter(outputObj);
+}
+function globalHeader(outputObj) {
+	outputObj.BeginHeader();
+	outputObj.EndHeader();
+}
+function globalFooter(outputObj) {
+	outputObj.BeginFooter();
+	outputObj.EndFooter();
+}
+
+/**
+ * @param {Output} p_output The output object
+ * @param {Database[]} p_aDatabase 
+*/
+function createSection1(ooutfile, p_aDatabase)
+{
+	// do not create new section if all data is empty
+	if(p_aDatabase.length==0)
+		return;
+//produce one table sheet per section
+	if(xlTableActive && Context.getSelectedFormat()==Constants.OUTEXCEL) {
+		p_output.EndTable("", 100, "", 10, Constants.C_BLACK, Constants.C_TRANSPARENT, 0, Constants.FMT_LEFT, 0);
+		xlTableActive=false;
+	}
+	ooutfile.BeginSection(false, Constants.SECTION_DEFAULT);
+	setupOutputObject( ooutfile ); //use defaults
+	if(Context.getSelectedFormat()==Constants.OUTEXCEL) {
+		ooutfile.BeginTable(100, Constants.C_BLACK, Constants.C_TRANSPARENT,  Constants.FMT_LEFT | Constants.FMT_REPEAT_HEADER, 0);
+		xlTableActive=true;
+	}
+	if(Context.getSelectedFormat()!=Constants.OUTEXCEL){
+		ooutfile.BeginTable(65, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0);
+		ooutfile.TableRow();
+			ooutfile.ResetFrameStyle();
+			ooutfile.TableCell("", 20, "Times New Roman", 10, Constants.C_BLACK, Constants.C_TRANSPARENT, 0,  Constants.FMT_VTOP |  Constants.FMT_LEFT, 0);
+		ooutfile.BeginParagraph( Constants.FMT_LEFT, 0.71, 0.71, 0, 0, 0);
+		ooutfile.OutputLn("Процесс", "Times New Roman", 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
+		ooutfile.EndParagraph();
+			ooutfile.TableCell("", 20, "Times New Roman", 10, Constants.C_BLACK, Constants.C_TRANSPARENT, 0,  Constants.FMT_VTOP |  Constants.FMT_LEFT, 0);
+		ooutfile.BeginParagraph( Constants.FMT_LEFT, 0.71, 0.71, 0, 0, 0);
+		ooutfile.OutputLn("Цель", "Times New Roman", 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
+		ooutfile.EndParagraph();
+			ooutfile.TableCell("", 20, "Times New Roman", 10, Constants.C_BLACK, Constants.C_TRANSPARENT, 0,  Constants.FMT_VTOP |  Constants.FMT_LEFT, 0);
+		ooutfile.BeginParagraph( Constants.FMT_LEFT, 0.71, 0.71, 0, 0, 0);
+		ooutfile.OutputLn("Владелец", "Times New Roman", 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
+		ooutfile.EndParagraph();
+			ooutfile.TableCell("", 41.15, "Times New Roman", 10, Constants.C_BLACK, Constants.C_TRANSPARENT, 0,  Constants.FMT_VTOP |  Constants.FMT_LEFT, 0);
+		ooutfile.BeginParagraph( Constants.FMT_LEFT, 0.71, 0.71, 0, 0, 0);
+		ooutfile.OutputLn("Вхпод", "Times New Roman", 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
+		ooutfile.EndParagraph();
+			ooutfile.TableCell("", 35.82, "Times New Roman", 10, Constants.C_BLACK, Constants.C_TRANSPARENT, 0,  Constants.FMT_VTOP |  Constants.FMT_LEFT, 0);
+		ooutfile.BeginParagraph( Constants.FMT_LEFT, 0.35, 0.71, 0, 0, 0);
+		ooutfile.OutputLn("Выход", "Times New Roman", 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35);
+		ooutfile.EndParagraph();
+    }
+	if(Context.getSelectedFormat()!=Constants.OUTEXCEL){
+		ooutfile.EndTable("", 100, "Times New Roman", 10, Constants.C_BLACK, Constants.C_TRANSPARENT, 0, Constants.FMT_LEFT, 0);
+	} else {
+		ooutfile.TableRow();}
+	// repetition of queried data:
+	//for(var i=0; i<p_aDatabase.length; i++) {
+		iteration_group(ooutfile, ArisData.sort(p_aDatabase.Find(Constants.SEARCH_MODEL,[Constants.MT_VAL_ADD_CHN_DGM], Constants.AT_NAME, nLocale, "*Окруж*", Constants.SEARCH_CMP_WILDCARDS),Constants.AT_NAME, nLocale));
+//	} 
+	
+
+
+	// createSection1 local functions:
+		/**
+		 * @param {Output} p_output The output object
+		 * @param {Model[]} p_aModel 
+		*/
+		function iteration_group(p_output, p_aModel)
+		{
+			// repetition of queried data:
+			for(var i1=0; i1<p_aModel.length; i1++) {
+				iteration_group1(p_output, ArisData.sort(p_aModel[i1].ObjDefListByTypes([Constants.OT_FUNC]),Constants.AT_HIER_NUM, nLocale));
+			}
+
+			// iteration_group local functions:
+				/**
+				 * @param {Output} p_output The output object
+				 * @param {ObjDef[]} p_aObjDef 
+				*/
+				function iteration_group1(p_output, p_aObjDef)
+				{
+					static1_group(p_output, collect(p_aObjDef), collect1(p_aObjDef), collect2(p_aObjDef), collect3(p_aObjDef), collect4(p_aObjDef));
+					// iteration_group1 local functions:
+					/**
+					 * @param {Output} p_output The output object
+					 * @param {ObjDef[]} p_aObjDef1 
+					 * @param {ObjDef[]} p_aObjDef2 
+					 * @param {ObjDef[]} p_aObjDef3 
+					 * @param {ObjDef[]} p_aObjDef4 
+					 * @param {ObjDef[]} p_aObjDef5 
+					*/
+					function static1_group(p_output, p_aObjDef1,p_aObjDef2,p_aObjDef3,p_aObjDef4,p_aObjDef5)
+					{
+						dtable(p_output, collect5(p_aObjDef));
+						// static1_group local functions:
+						/**
+						 * @param {Output} p_output The output object
+						 * @param {Attr[]} p_aAttr 
+						*/
+						function dtable(p_output, p_aAttr)
+						{
+							// do not create new table if all data is empty
+							if(p_aAttr.length==0)
+								return;
+						
+							if(Context.getSelectedFormat()!=Constants.OUTEXCEL)
+								p_output.BeginTable(65, RGB(0,0,0), RGB(255,255,255),  Constants.FMT_LEFT, 0);
+							// repetition of queried data:
+							for(var i2=0; i2<p_aAttr.length; i2++) {
+								p_output.TableRow();
+									p_output.ResetFrameStyle();
+									p_output.TableCellF("", 20, "TableMain");
+								p_output.BeginParagraph( Constants.FMT_LEFT, 0.71, 0.71, 0, 0, 0);
+							for(var iter=0; iter<p_aObjDef.length; iter++) {
+								writeData(p_output, p_aObjDef[iter].Name(nLocale));
+							}
+							//	p_output.Output("Процесс", "Times New Roman", 11,  Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
+							for(var iter=0; iter<p_aObjDef.length; iter++) {
+								writeData1(p_output, p_aObjDef[iter].Attribute(Constants.AT_DESC, nLocale).GetValue(false));
+							}
+								p_output.EndParagraph();
+									p_output.TableCellF("", 20, "TableMain");
+								p_output.BeginParagraph( Constants.FMT_LEFT, 0.35, 0.71, 0, 0, 0);
+							for(var iter=0; iter<p_aObjDef1.length; iter++) {
+								writeData2(p_output, p_aObjDef1[iter].Name(nLocale));
+							}
+							//	p_output.Output("Цель", "Times New Roman", 11,  Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35);
+							for(var iter=0; iter<p_aObjDef1.length; iter++) {
+								writeData3(p_output, p_aObjDef1[iter].Attribute(Constants.AT_DESC, nLocale).GetValue(false));
+							}
+								p_output.EndParagraph()
+									p_output.TableCellF("", 20, "TableMain");
+								p_output.BeginParagraph( Constants.FMT_LEFT, 0.71, 0.71, 0, 0, 0);
+							for(var iter=0; iter<p_aObjDef2.length; iter++) {
+								writeData4(p_output, p_aObjDef2[iter].Name(nLocale));
+							}
+								p_output.EndParagraph();
+									p_output.TableCellF("", 41.15, "TableMain");
+								p_output.BeginParagraph( Constants.FMT_LEFT, 0.71, 0.71, 0, 0, 0);
+							for(var iter=0; iter<p_aObjDef4.length; iter++) {
+								writeData5(p_output, p_aObjDef4[iter].Name(nLocale));
+							}
+						//		p_output.Output("Вход", "Times New Roman", 11,  Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
+							for(var iter=0; iter<p_aObjDef4.length; iter++) {
+								writeData6(p_output, p_aObjDef4[iter].Attribute(Constants.AT_DESC, nLocale).GetValue(false));
+							}
+								p_output.EndParagraph();
+									p_output.TableCellF("", 35.82, "TableMain");
+								p_output.BeginParagraph( Constants.FMT_LEFT, 0.35, 0.71, 0, 0, 0);
+							for(var iter=0; iter<p_aObjDef5.length; iter++) {
+								writeData7(p_output, p_aObjDef5[iter].Name(nLocale));
+							}
+						//		p_output.OutputLn("Выход", "Times New Roman", 11,  Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35);
+								p_output.EndParagraph();
+							}
+
+							if(Context.getSelectedFormat()!=Constants.OUTEXCEL){
+								p_output.EndTable("", 100, "Times New Roman", 10, Constants.C_BLACK, Constants.C_TRANSPARENT, 0, Constants.FMT_LEFT, 0);
+							}else{
+								p_output.TableRow();
+}
+							// dtable local functions:
+							/**
+							 * @param {Output} p_output The output object
+							 * @param {String } p_String
+							*/
+							function writeData(p_output, p_String) {
+								p_output.Output(p_String, "Times New Roman", 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
+							}
+							/**
+							 * @param {Output} p_output The output object
+							 * @param {Object } p_Object
+							*/
+							function writeData1(p_output, p_Object) {
+								p_output.OutputLn(p_Object, "Times New Roman", 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
+							}
+							/**
+							 * @param {Output} p_output The output object
+							 * @param {String } p_String
+							*/
+							function writeData2(p_output, p_String) {
+								p_output.Output(p_String, "Times New Roman", 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35);
+							}
+							/**
+							 * @param {Output} p_output The output object
+							 * @param {Object } p_Object
+							*/
+							function writeData3(p_output, p_Object) {
+								p_output.OutputLn(p_Object, "Times New Roman", 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35);
+							}
+							/**
+							 * @param {Output} p_output The output object
+							 * @param {String } p_String
+							*/
+							function writeData4(p_output, p_String) {
+								p_output.OutputLn(p_String, "Times New Roman", 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
+							}
+							/**
+							 * @param {Output} p_output The output object
+							 * @param {String } p_String
+							*/
+							function writeData5(p_output, p_String) {
+								p_output.Output(p_String, "Times New Roman", 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
+							}
+							/**
+							 * @param {Output} p_output The output object
+							 * @param {Object } p_Object
+							*/
+							function writeData6(p_output, p_Object) {
+								p_output.OutputLn(p_Object, "Times New Roman", 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.71);
+							}
+							/**
+							 * @param {Output} p_output The output object
+							 * @param {String } p_String
+							*/
+							function writeData7(p_output, p_String) {
+								p_output.Output(p_String, "Times New Roman", 11, RGB(0,0,0), Constants.C_TRANSPARENT,  Constants.FMT_LEFT, 0.35);
+							}
+						}
+						
+						function collect5(p_array){
+							var result = new Array();
+							for(var i=0; i<p_array.length; i++){
+								result.push(p_array[i].Attribute(Constants.AT_NAME, nLocale));
+							}
+							return ArisData.Unique(result);
+						}
+					}
+					
+					function collect4(p_array){
+						var result = new Array();
+						for(var i=0; i<p_array.length; i++){
+							result = result.concat(p_array[i].getConnectedObjs([Constants.OT_PACK], Constants.EDGES_OUT, [Constants.CT_HAS_OUT]));
+						}
+						return ArisData.Unique(result);
+					}
+					function collect2(p_array){
+						var result = new Array();
+						for(var i=0; i<p_array.length; i++){
+							result = result.concat(p_array[i].getConnectedObjs(new Array(Constants.OT_ORG_UNIT,Constants.OT_ORG_UNIT_TYPE), Constants.EDGES_TYP, [Constants.CT_HAS_CONSLT_ROLE_IN_1]));
+						}
+						return ArisData.Unique(result);
+					}
+					function collect3(p_array){
+						var result = new Array();
+						for(var i=0; i<p_array.length; i++){
+							result = result.concat(p_array[i].getConnectedObjs([Constants.OT_PACK], Constants.EDGES_IN, [Constants.CT_IS_INP_FOR]));
+						}
+						return ArisData.Unique(result);
+					}
+					function collect1(p_array){
+						var result = new Array();
+						for(var i=0; i<p_array.length; i++){
+							result = result.concat(p_array[i].getConnectedObjs(new Array(Constants.OT_GRP,Constants.OT_PERS_TYPE), Constants.EDGES_TYP, null));
+						}
+						return ArisData.Unique(result);
+					}
+					function collect(p_array){
+						var result = new Array();
+						for(var i=0; i<p_array.length; i++){
+							result = result.concat(p_array[i].getConnectedObjs([Constants.OT_OBJECTIVE], Constants.EDGES_TYP, null))
+						}
+						return ArisData.Unique(result);
+					}
+				}
+				
+		
+		}
+	if(Context.getSelectedFormat()==Constants.OUTEXCEL) {
+		p_output.EndTable(getString("ID_REPORTDEF_8"), 100, "", 10, Constants.C_BLACK, Constants.C_TRANSPARENT, 0, Constants.FMT_LEFT, 0);
+		xlTableActive=false;
+	}
+	ooutfile.EndSection();
+
+
+}
+
+
+function RGB(r, g, b) {
+	return (new java.awt.Color(r/255.0,g/255.0,b/255.0,1)).getRGB() & 0xFFFFFF;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+main();
+
+
+
