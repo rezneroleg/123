@@ -1,0 +1,24 @@
+//var gr = ArisData.getSelectedGroups()[0];
+//var g = gr.GUID();
+
+
+  var gr = ArisData.getActiveDatabase().FindGUID("bc1aa655-8668-11e2-7179-080027cef185");
+    var g_nloc = 0; 
+     
+         var aOut        = new Array();
+        var aOut1        = new Array();
+        var aAllOccs    = gr.ModelList(true, [Constants.MT_VAL_ADD_CHN_DGM]);
+         g_nloc = Context.getSelectedLanguage();
+   //     aAllOccs.sort( sortDefsNames );
+        if (aAllOccs.length > 0) {
+        g_nloc = Context.getSelectedLanguage();
+           for(var j=0; j<aAllOccs.length; j++){
+               if ( aAllOccs[j].Name(g_nloc).startsWith("_Окружение БП 3.2.2.7. Овердрафтное кредитование с использованием дебетовых банковских платежных карточек"))  {
+               aOut.push( aAllOccs[j] );}
+
+
+}
+        }
+var aOut1 = aOut[0].Attribute(Constants.AT_CREAT_TIME_STMP, g_nloc).GetValue(true);
+
+Dialogs.MsgBox(aOut1);
