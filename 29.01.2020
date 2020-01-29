@@ -1,7 +1,3 @@
-/********************************************
-* Copyright © ОАО "Белагропромбанк", 2020. *
-********************************************/
-
 
 var oOutput = Context.createOutputObject();
 var xlTableActive=false;
