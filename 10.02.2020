@@ -335,11 +335,11 @@ ooutfile.DefineF("ID_STYLE_RD_HEADING_2", "Times New Roman", 14,  Constants.C_TR
             createSection33(ooutfile, ArisData.getActiveDatabase(), nom1010, nom1010n, namtab10);
             createSection33(ooutfile, ArisData.getActiveDatabase(), nom1011, nom1011n, namtab10);
             outputDataPerModel1( aSelModels, hld_oOutputFile, hld_nOutGraphic.value, hld_nAssgnLevel.value, 0, nom44 );
-            createSection1(ooutfile, ArisData.getActiveDatabase(), nom11, namtab11);
+            createSection1(ooutfile, ArisData.getActiveDatabase(), nom11, nom11n, amtab11);
            
             // выводим модели 4. обеспечивающие
             outputDataPerModel1( aSelModels, hld_oOutputFile, hld_nOutGraphic.value, hld_nAssgnLevel.value, 0, nom5 );
-            createSection1(ooutfile, ArisData.getActiveDatabase(), nom12, namtab12);
+            createSection1(ooutfile, ArisData.getActiveDatabase(), nom12, nom12n, namtab12);
             
             // выводим модель Верхнеуровневую
             outputDataPerModelP( aSelModels, hld_oOutputFile, hld_nOutGraphic.value, hld_nAssgnLevel.value, 0 );
